@@ -9,7 +9,7 @@ Face recognition system for identifying missing persons using InsightFace/ArcFac
 ```bash
 chmod +x setup.sh && ./setup.sh
 uvicorn main:app --reload
-cd frontend && npm run dev  # new terminal
+cd frontend && npm run dev 
 ```
 
 Access at http://localhost:5173 | Default: `admin` / `admin123`
@@ -39,43 +39,19 @@ For PostgreSQL: `createdb missing_persons_db && alembic upgrade head`
 ## Development
 
 ```bash
-# Run tests
-pytest
-
-# Run tests with coverage
-pytest --cov=. --cov-report=html
-
-# Database migrations (if using PostgreSQL)
-alembic upgrade head
+pytest --cov=.
 alembic revision --autogenerate -m "description"
-
-# Install dependencies
-pip install -r requirements.txt
-cd frontend && npm install
 ```
 
 ## Performance
 
-- Face detection: ~100-500ms
-- Embedding generation: ~50-100ms
-- Vector search: <100ms (50k embeddings)
-- End-to-end: <3 seconds
+End-to-end search: <3s (detection ~100-500ms, embedding ~50-100ms, FAISS <100ms for 50k vectors)
 
 ## Troubleshooting
 
-**Database errors**: 
-- SQLite: Check file permissions in project directory
-- PostgreSQL: Verify PostgreSQL is running and credentials are correct
-
-**Redis connection issues**: Ensure Redis server is running (`redis-server`)
-
-**Face detection issues**: 
-- Ensure clear, frontal faces with good lighting
-- Adjust `FACE_DETECTION_CONFIDENCE` in `.env` (lower = more permissive)
-
-**Model loading**: InsightFace models download on first use (requires internet connection)
-
-**Frontend not connecting**: Check `ALLOWED_ORIGINS` includes your frontend URL (default: http://localhost:5173)
+- Lower `FACE_DETECTION_CONFIDENCE` for difficult images
+- InsightFace models auto-download on first use
+- Check Redis is running: `redis-server`
 
 ## License
 

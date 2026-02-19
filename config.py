@@ -6,6 +6,9 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./missing_persons.db"
+    POSTGRES_DB: str = "missing_persons_db"
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
