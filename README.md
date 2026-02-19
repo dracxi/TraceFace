@@ -1,79 +1,40 @@
 # Missing Person Face Recognition System
 
-A face recognition system for identifying missing persons. Upload a photo to search against a database of missing persons, or manage records through the admin panel.
+Face recognition system for identifying missing persons using InsightFace/ArcFace embeddings and FAISS vector search.
 
-## Features
-
-- Face search using InsightFace/ArcFace embeddings
-- Admin panel for managing missing person records
-- JWT authentication for admin operations
-- FAISS vector database for fast similarity search
-- Redis caching for improved performance
-- Complete audit logging
-
-## Tech Stack
-
-**Backend**: Python 3.11, FastAPI, PostgreSQL, Redis, FAISS, InsightFace  
-**Frontend**: React 18, TypeScript, Vite
+**Stack**: FastAPI, React 18, SQLite/PostgreSQL, Redis, FAISS, InsightFace
 
 ## Quick Start
 
 ```bash
-# Automated setup
 chmod +x setup.sh && ./setup.sh
-
-# Start backend
 uvicorn main:app --reload
-
-# Start frontend (new terminal)
-cd frontend && npm run dev
+cd frontend && npm run dev  # new terminal
 ```
 
-**Access**:
-- Frontend: http://localhost:3000
-- API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+Access at http://localhost:5173 | Default: `admin` / `admin123`
 
-**Default credentials**: `admin` / `admin123` (change in production!)
+## API
 
-## Project Structure
+Docs: http://localhost:8000/docs
 
-```
-├── api/                    # API endpoints
-├── database/              # SQLAlchemy models & migrations
-├── models/                # Pydantic schemas
-├── services/              # Business logic (face detection, embeddings, etc.)
-├── frontend/              # React frontend
-├── tests/                 # Tests
-├── main.py               # FastAPI app
-└── config.py             # Configuration
-```
-
-## API Endpoints
-
-**Public**:
-- `POST /api/v1/search` - Search by face image
-
-**Auth**:
-- `POST /api/v1/auth/register` - Register admin
-- `POST /api/v1/auth/login` - Login
-
-**Admin** (requires JWT):
-- `POST /api/v1/admin/missing-persons` - Upload person
-- `GET /api/v1/admin/missing-persons` - List persons
-- `DELETE /api/v1/admin/missing-persons/{id}` - Delete person
+**Public**: `POST /api/v1/search`  
+**Auth**: `POST /api/v1/auth/login`  
+**Admin**: CRUD on `/api/v1/admin/missing-persons` (JWT required)
 
 ## Configuration
 
-Key settings in `.env`:
+See `.env.example`. Key settings:
 
 ```bash
-DATABASE_URL=postgresql://user:pass@localhost/db
+DATABASE_URL=sqlite:///./missing_persons.db  # or postgresql://...
 REDIS_URL=redis://localhost:6379/0
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=change-in-production
 FACE_DETECTION_CONFIDENCE=0.9
 DEFAULT_MATCH_THRESHOLD=0.6
 ```
+
+For PostgreSQL: `createdb missing_persons_db && alembic upgrade head`
 
 ## Development
 
@@ -81,12 +42,16 @@ DEFAULT_MATCH_THRESHOLD=0.6
 # Run tests
 pytest
 
-# Database migrations
+# Run tests with coverage
+pytest --cov=. --cov-report=html
+
+# Database migrations (if using PostgreSQL)
 alembic upgrade head
 alembic revision --autogenerate -m "description"
 
-# Code formatting
-black .
+# Install dependencies
+pip install -r requirements.txt
+cd frontend && npm install
 ```
 
 ## Performance
@@ -98,9 +63,19 @@ black .
 
 ## Troubleshooting
 
-**Database errors**: Check PostgreSQL is running  
-**Face detection issues**: Ensure clear, frontal faces with good lighting  
-**Model loading**: InsightFace models download on first use (requires internet)
+**Database errors**: 
+- SQLite: Check file permissions in project directory
+- PostgreSQL: Verify PostgreSQL is running and credentials are correct
+
+**Redis connection issues**: Ensure Redis server is running (`redis-server`)
+
+**Face detection issues**: 
+- Ensure clear, frontal faces with good lighting
+- Adjust `FACE_DETECTION_CONFIDENCE` in `.env` (lower = more permissive)
+
+**Model loading**: InsightFace models download on first use (requires internet connection)
+
+**Frontend not connecting**: Check `ALLOWED_ORIGINS` includes your frontend URL (default: http://localhost:5173)
 
 ## License
 
