@@ -14,17 +14,13 @@ A face recognition system for identifying missing persons. Upload a photo to sea
 ## Tech Stack
 
 **Backend**: Python 3.11, FastAPI, PostgreSQL, Redis, FAISS, InsightFace  
-**Frontend**: React 18, TypeScript, Vite  
-**Deployment**: Docker, Docker Compose
+**Frontend**: React 18, TypeScript, Vite
 
 ## Quick Start
 
 ```bash
 # Automated setup
 chmod +x setup.sh && ./setup.sh
-
-# Start services
-docker-compose up -d
 
 # Start backend
 uvicorn main:app --reload
@@ -128,7 +124,7 @@ curl -X POST "http://localhost:8000/api/v1/admin/missing-persons" \
 
 ## Troubleshooting
 
-**Database errors**: Check PostgreSQL is running with `docker-compose ps`  
+**Database errors**: Check PostgreSQL is running  
 **Face detection issues**: Ensure clear, frontal faces with good lighting  
 **Model loading**: InsightFace models download on first use (requires internet)
 

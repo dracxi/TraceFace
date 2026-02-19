@@ -13,6 +13,17 @@ if [ ! -f .env ]; then
     echo "✓ Created .env file"
 fi
 
+# Create virtual environment
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+    echo "✓ Virtual environment created"
+fi
+
+# Activate virtual environment
+echo "Activating virtual environment..."
+source venv/bin/activate
+
 # Install Python dependencies
 echo "Installing Python dependencies..."
 pip install -r requirements.txt
@@ -50,9 +61,9 @@ echo ""
 echo "✓ Setup complete!"
 echo ""
 echo "Next steps:"
-echo "  1. docker-compose up -d"
+echo "  1. source venv/bin/activate"
 echo "  2. uvicorn main:app --reload"
-echo "  3. cd frontend && npm run dev"
+echo "  3. cd frontend && npm run dev (in a new terminal)"
 echo ""
 echo "Access:"
 echo "  API: http://localhost:8000"

@@ -6,9 +6,8 @@ Thanks for your interest in contributing to the Missing Person Face Recognition 
 
 1. Fork and clone the repository
 2. Run the setup script: `./setup.sh`
-3. Start services: `docker-compose up -d`
-4. Start the backend: `uvicorn main:app --reload`
-5. Start the frontend: `cd frontend && npm run dev`
+3. Start the backend: `uvicorn main:app --reload`
+4. Start the frontend: `cd frontend && npm run dev`
 
 ## Code Style
 
