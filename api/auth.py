@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database.connection import get_db
 from models.schemas import LoginRequest, TokenResponse, AdminUserCreate, AdminUser as AdminUserSchema
 from services.auth import login, create_admin_user
+from api.dependencies import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -34,3 +35,9 @@ async def login_endpoint(login_data: LoginRequest, db: Session = Depends(get_db)
         )
     
     return token_response
+
+
+@router.get("/validate")
+async def validate_token(current_user: AdminUserSchema = Depends(get_current_user)):
+    """Validate the current JWT token."""
+    return {"valid": True, "user": current_user}

@@ -89,32 +89,6 @@ alembic revision --autogenerate -m "description"
 black .
 ```
 
-## Usage Examples
-
-**Search**:
-```bash
-curl -X POST "http://localhost:8000/api/v1/search" \
-  -F "image=@photo.jpg" \
-  -F "threshold=0.6"
-```
-
-**Upload** (admin):
-```bash
-# Get token
-TOKEN=$(curl -X POST "http://localhost:8000/api/v1/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}' \
-  | jq -r '.access_token')
-
-# Upload person
-curl -X POST "http://localhost:8000/api/v1/admin/missing-persons" \
-  -H "Authorization: Bearer $TOKEN" \
-  -F "name=John Doe" \
-  -F "date_reported=2024-01-15T10:00:00Z" \
-  -F "contact_info=555-0123" \
-  -F "photos=@photo.jpg"
-```
-
 ## Performance
 
 - Face detection: ~100-500ms

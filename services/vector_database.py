@@ -119,9 +119,11 @@ class VectorDatabase:
             for dist, idx in zip(distances[0], indices[0]):
                 if idx in self.id_map:
                     person_id, photo_id = self.id_map[idx]
-                    logger.info(f"Match: person_id={person_id}, photo_id={photo_id}, similarity={dist}, threshold={threshold}")
-                    if dist >= threshold:
-                        results.append((person_id, photo_id, float(dist)))
+                    # Clamp similarity to [0, 1] to handle floating-point precision issues
+                    similarity = min(1.0, max(0.0, float(dist)))
+                    logger.info(f"Match: person_id={person_id}, photo_id={photo_id}, similarity={similarity}, threshold={threshold}")
+                    if similarity >= threshold:
+                        results.append((person_id, photo_id, similarity))
             
             # Sort by similarity descending
             results.sort(key=lambda x: x[2], reverse=True)

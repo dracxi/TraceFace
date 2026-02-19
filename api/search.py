@@ -156,11 +156,14 @@ async def search_missing_person(
             match = SearchMatch(
                 person_id=person.person_id,
                 name=person.name,
+                age=person.age,
+                gender=person.gender,
                 similarity_score=similarity_score,
                 photo_url=photo_url,
                 last_seen_location=person.last_seen_location,
                 date_reported=person.date_reported,
-                contact_info=person.contact_info
+                contact_info=person.contact_info,
+                status=person.status
             )
             matches.append(match)
         
@@ -180,6 +183,159 @@ async def search_missing_person(
         raise
     except Exception as e:
         logger.error(f"Search failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search failed: {str(e)}"
+        )
+
+
+
+@router.get("/text", response_model=dict)
+async def text_search_missing_persons(
+    q: Optional[str] = None,
+    age_min: Optional[int] = None,
+    age_max: Optional[int] = None,
+    gender: Optional[str] = None,
+    location: Optional[str] = None,
+    status: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 20,
+    sort_by: str = 'date_reported',
+    sort_order: str = 'desc',
+    db: Session = Depends(get_db)
+):
+    """
+    Text-based search for missing persons with filters.
+    
+    Public endpoint - no authentication required.
+    
+    Args:
+        q: Name or partial name search
+        age_min: Minimum age filter
+        age_max: Maximum age filter
+        gender: Gender filter
+        location: Last seen location filter (partial match)
+        status: Status filter ('missing' or 'traced')
+        page: Page number (starts at 1)
+        page_size: Results per page (1-100)
+        sort_by: Sort field ('name', 'date_reported', 'status')
+        sort_order: Sort order ('asc' or 'desc')
+    """
+    # Validate parameters
+    if page < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Page must be >= 1"
+        )
+    
+    if not 1 <= page_size <= 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="page_size must be between 1 and 100"
+        )
+    
+    if sort_by not in ['name', 'date_reported', 'status']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="sort_by must be 'name', 'date_reported', or 'status'"
+        )
+    
+    if sort_order not in ['asc', 'desc']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="sort_order must be 'asc' or 'desc'"
+        )
+    
+    if status and status not in ['missing', 'traced']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status must be 'missing' or 'traced'"
+        )
+    
+    try:
+        # Build query
+        query = db.query(DBMissingPerson)
+        
+        # Apply filters
+        if q:
+            # Case-insensitive partial name search
+            query = query.filter(DBMissingPerson.name.ilike(f'%{q}%'))
+        
+        if age_min is not None:
+            query = query.filter(DBMissingPerson.age >= age_min)
+        
+        if age_max is not None:
+            query = query.filter(DBMissingPerson.age <= age_max)
+        
+        if gender:
+            query = query.filter(DBMissingPerson.gender.ilike(gender))
+        
+        if location:
+            # Case-insensitive partial location search
+            query = query.filter(DBMissingPerson.last_seen_location.ilike(f'%{location}%'))
+        
+        if status:
+            query = query.filter(DBMissingPerson.status == status)
+        
+        # Get total count before pagination
+        total = query.count()
+        
+        # Apply sorting
+        sort_column = getattr(DBMissingPerson, sort_by)
+        if sort_order == 'desc':
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+        
+        # Apply pagination
+        offset = (page - 1) * page_size
+        query = query.offset(offset).limit(page_size)
+        
+        # Execute query
+        persons = query.all()
+        
+        # Build results
+        results = []
+        for person in persons:
+            # Get photo URLs
+            photos = db.query(PersonPhoto).filter(
+                PersonPhoto.person_id == person.person_id
+            ).all()
+            photo_urls = [photo.photo_url for photo in photos]
+            
+            result = {
+                "person_id": str(person.person_id),
+                "name": person.name,
+                "age": person.age,
+                "gender": person.gender,
+                "description": person.description,
+                "photo_urls": photo_urls,
+                "last_seen_location": person.last_seen_location,
+                "date_reported": person.date_reported.isoformat(),
+                "status": person.status,
+                "traced_date": person.traced_date.isoformat() if person.traced_date else None,
+                "traced_notes": person.traced_notes,
+                "contact_info": person.contact_info,
+                "created_at": person.created_at.isoformat(),
+                "updated_at": person.updated_at.isoformat()
+            }
+            results.append(result)
+        
+        # Calculate total pages
+        total_pages = (total + page_size - 1) // page_size
+        
+        return {
+            "results": results,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Text search failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Search failed: {str(e)}"

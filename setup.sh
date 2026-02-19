@@ -28,9 +28,29 @@ source venv/bin/activate
 echo "Installing Python dependencies..."
 pip install -r requirements.txt
 
-# Initialize database
-echo "Initializing database..."
-python -c "from database.connection import Base, engine; Base.metadata.create_all(bind=engine)"
+# Check if using PostgreSQL and verify connection
+if grep -q "postgresql://" .env; then
+    echo "Detected PostgreSQL configuration..."
+    
+    # Check if PostgreSQL is installed
+    if ! command -v psql &> /dev/null; then
+        echo "⚠️  PostgreSQL client not found in PATH."
+        echo "If PostgreSQL is installed, ensure psql is accessible."
+        echo "Otherwise, install with: sudo apt install postgresql postgresql-contrib"
+        echo "Or switch to SQLite by changing DATABASE_URL in .env to:"
+        echo "  DATABASE_URL=sqlite:///./missing_persons.db"
+    else
+        echo "✓ PostgreSQL client detected"
+        
+        # Extract database connection details from DATABASE_URL
+        DB_NAME=$(grep DATABASE_URL .env | cut -d'/' -f4 | cut -d'?' -f1)
+        echo "Database configured: $DB_NAME"
+    fi
+fi
+
+# Run database migrations
+echo "Running database migrations..."
+alembic upgrade head
 
 # Create default admin user
 echo "Creating default admin user..."

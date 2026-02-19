@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from api.auth import router as auth_router
 from api.missing_persons import router as missing_persons_router
@@ -30,6 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files for uploads
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 @app.exception_handler(RequestValidationError)
