@@ -5,6 +5,8 @@ import ImageUpload from '../components/ImageUpload';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Input from '../components/Input';
 import Select from '../components/Select';
+import Logo from '../components/Logo';
+import Footer from '../components/Footer';
 
 interface Match {
   person_id: string;
@@ -115,10 +117,11 @@ const SearchPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 shadow-lg">
         <div className="container mx-auto px-4">
+          <Logo size="large" className="mb-4" />
           <h1 className="text-4xl font-bold mb-2">Missing Person Face Recognition</h1>
           <p className="text-blue-100">Help reunite families by searching our database</p>
         </div>
@@ -382,6 +385,8 @@ const SearchPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

@@ -16,6 +16,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Input from '../components/Input';
 import Select from '../components/Select';
 import TextArea from '../components/TextArea';
+import Logo from '../components/Logo';
+import Footer from '../components/Footer';
 
 interface Person {
   person_id: string;
@@ -259,11 +261,14 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <Logo size="medium" />
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          </div>
           <button
             onClick={handleLogout}
             className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
@@ -571,6 +576,8 @@ const AdminPanel: React.FC = () => {
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   );
 };
