@@ -50,6 +50,9 @@ const AdminPanel: React.FC = () => {
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusPerson, setStatusPerson] = useState<Person | null>(null);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [viewingPerson, setViewingPerson] = useState<Person | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -387,7 +390,30 @@ const AdminPanel: React.FC = () => {
             <div className="space-y-4">
               {persons.map((person) => (
                 <div key={person.person_id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-4">
+                    {/* Photo thumbnail */}
+                    {person.photo_urls && person.photo_urls.length > 0 && (
+                      <div 
+                        className="flex-shrink-0 cursor-pointer"
+                        onClick={() => {
+                          setViewingPerson(person);
+                          setCurrentImageIndex(0);
+                          setShowImageModal(true);
+                        }}
+                      >
+                        <img
+                          src={person.photo_urls[0]}
+                          alt={person.name}
+                          className="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors"
+                        />
+                        {person.photo_urls.length > 1 && (
+                          <p className="text-xs text-center text-gray-500 mt-1">
+                            +{person.photo_urls.length - 1} more
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-bold">{person.name}</h3>
@@ -404,6 +430,18 @@ const AdminPanel: React.FC = () => {
                         Reported: {new Date(person.date_reported).toLocaleDateString()}
                       </p>
                       <p className="text-gray-600">Contact: {person.contact_info}</p>
+                      {person.photo_urls && person.photo_urls.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setViewingPerson(person);
+                            setCurrentImageIndex(0);
+                            setShowImageModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-800 text-sm mt-2"
+                        >
+                          View {person.photo_urls.length} photo{person.photo_urls.length > 1 ? 's' : ''}
+                        </button>
+                      )}
                     </div>
                     <div className="flex flex-col gap-2">
                       <button
@@ -537,6 +575,86 @@ const AdminPanel: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Image Viewer Modal */}
+      {showImageModal && viewingPerson && viewingPerson.photo_urls && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div
+            className="relative max-w-4xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-4 right-4 bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-200 transition-colors z-10"
+            >
+              ✕
+            </button>
+
+            {/* Person info */}
+            <div className="bg-white rounded-t-lg p-4">
+              <h2 className="text-2xl font-bold">{viewingPerson.name}</h2>
+              <p className="text-gray-600">
+                {viewingPerson.age && `Age: ${viewingPerson.age} • `}
+                {viewingPerson.gender && `${viewingPerson.gender} • `}
+                Status: {viewingPerson.status}
+              </p>
+            </div>
+
+            {/* Image display */}
+            <div className="bg-white p-4">
+              <img
+                src={viewingPerson.photo_urls[currentImageIndex]}
+                alt={`${viewingPerson.name} - Photo ${currentImageIndex + 1}`}
+                className="w-full h-auto max-h-[60vh] object-contain rounded-lg"
+              />
+            </div>
+
+            {/* Navigation */}
+            {viewingPerson.photo_urls.length > 1 && (
+              <div className="bg-white rounded-b-lg p-4">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
+                    disabled={currentImageIndex === 0}
+                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    ← Previous
+                  </button>
+                  <span className="text-gray-600">
+                    {currentImageIndex + 1} / {viewingPerson.photo_urls.length}
+                  </span>
+                  <button
+                    onClick={() => setCurrentImageIndex(Math.min(viewingPerson.photo_urls.length - 1, currentImageIndex + 1))}
+                    disabled={currentImageIndex === viewingPerson.photo_urls.length - 1}
+                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next →
+                  </button>
+                </div>
+                
+                {/* Thumbnail strip */}
+                <div className="flex gap-2 mt-4 overflow-x-auto">
+                  {viewingPerson.photo_urls.map((url, idx) => (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt={`Thumbnail ${idx + 1}`}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`w-16 h-16 object-cover rounded cursor-pointer border-2 transition-all ${
+                        idx === currentImageIndex ? 'border-blue-600 scale-110' : 'border-gray-300 hover:border-blue-400'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Status Update Modal */}
       {showStatusModal && statusPerson && (

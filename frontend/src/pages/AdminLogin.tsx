@@ -61,7 +61,7 @@ const AdminLogin: React.FC = () => {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
           <div className="text-center mb-8">
-            <Logo size="large" className="justify-center mb-4" />
+            <Logo size="large" className="justify-center mb-4" variant="dark" />
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Login</h1>
             <p className="text-gray-600">Access the admin dashboard</p>
           </div>

@@ -3,21 +3,35 @@ import React from 'react';
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
   className?: string;
+  variant?: 'light' | 'dark';
 }
 
-const Logo: React.FC<LogoProps> = ({ size = 'medium', className = '' }) => {
+const Logo: React.FC<LogoProps> = ({ size = 'medium', className = '', variant = 'light' }) => {
   const sizes = {
     small: { text: 'text-xl', icon: 'w-8 h-8' },
     medium: { text: 'text-3xl', icon: 'w-12 h-12' },
     large: { text: 'text-4xl', icon: 'w-16 h-16' }
   };
 
+  const colors = {
+    light: {
+      icon: 'bg-white/10 border-white/20',
+      svg: 'text-white',
+      text: 'text-white'
+    },
+    dark: {
+      icon: 'bg-blue-600/10 border-blue-600/20',
+      svg: 'text-blue-600',
+      text: 'text-gray-800'
+    }
+  };
+
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       {/* Glassmorphism icon */}
-      <div className={`${sizes[size].icon} rounded-2xl bg-white/10 backdrop-blur-md shadow-xl flex items-center justify-center border border-white/20`}>
+      <div className={`${sizes[size].icon} rounded-2xl ${colors[variant].icon} backdrop-blur-md shadow-xl flex items-center justify-center border`}>
         <svg
-          className="w-2/3 h-2/3 text-white drop-shadow-lg"
+          className={`w-2/3 h-2/3 ${colors[variant].svg} drop-shadow-lg`}
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +54,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'medium', className = '' }) => {
           <line x1="19" y1="19" x2="21" y2="21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
       </div>
-      <span className={`font-bold ${sizes[size].text} text-white drop-shadow-lg`}>
+      <span className={`font-bold ${sizes[size].text} ${colors[variant].text} drop-shadow-lg`}>
         TraceFace
       </span>
     </div>
